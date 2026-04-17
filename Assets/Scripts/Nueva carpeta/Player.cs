@@ -1,132 +1,176 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Fusion;
 using Fusion.Addons.Physics;
 using UnityEngine;
 
 public class Player : NetworkBehaviour
 {
-    [SerializeField] float _speed;
-    [SerializeField] float _jumpForce;
+    [Header("Speed")]
+    [SerializeField] float _defaultSpeed = 3f;
+    [SerializeField] float _sprintSpeed = 6f;
+    [SerializeField] float _jumpForce = 5f;
+
+    [Header("Lifes")]
     [SerializeField] int _maxLife;
-    [Networked] float Health {  get; set; }
-    [Networked]  public float _currentHealth { get; private set; }
-    //Crear una variable networkeada de vida actual y que tenga una forma de debugear el valor de vida cada vez que este se actualice
+    [Networked] float Health { get; set; }
+    [Networked] public float _currentHealth { get; private set; }
 
-    //crear referencia a la bala y a una posicion para spawnear balas.
-    [SerializeField] private Bullet _bulletPrefab;
-    [SerializeField] private Transform _bulletSpawnerTransform;
+    [Header("Crouch")]
+    [SerializeField] float _crouchSpeed = 3f;
+    [SerializeField] float _crouchColHeight = 1f;
+    [SerializeField] float _crouchColCenter = 1f;
 
-    [Header("Input Keys")]
-    public KeyCode _jumpKey;
-    public KeyCode _shootKey;
-    
-    private bool _isJumpPressed;
-    private bool _isShootPressed;
-    
-    private float _horizontalInput;
+    [Header("Shoot")]
+    [SerializeField] float _fireRate = 0.5f;
+    float _timer;
 
-    //crear variable de rigidbody
-    private NetworkRigidbody3D _rb;
-    
-    
+    [SerializeField] Ragdoll _ragdoll;
+    [SerializeField] Bullet _bulletPrefab;
+    [SerializeField] Transform _bulletSpawnerTransform;
+    [SerializeField] CharacterColliderResizer _colliderResizer;
+    [SerializeField] CharacterRotator _characterRotator;
+    [SerializeField] CharacterInputController _inputController;
+    [SerializeField] GroundRaycast _groundRaycast;
+    [SerializeField] InteractRaycast _interactRaycast;
+    //[SerializeField] CharacterMeshSelector _meshSelector;
+    [SerializeField] CharacterAnimationController _animationController;
+
+    bool _isGround;
+    //bool _isInteract;
+    bool _isJumping;
+    bool _isShooting;
+    bool _canShootNow;
+    bool _isCrouching;
+    bool _isRagdoll;
+
+
+    Camera _camera;
+    NetworkRigidbody3D _rb;
+    Vector3 _direction;
+
+    //int _randomMeshIndex = 0;
+
     public override void Spawned()
     {
-        //conseguir rigidbody
         _rb = GetComponent<NetworkRigidbody3D>();
 
-        //setear vida actual igual a la vida maxima
         _currentHealth = _maxLife;
+        _timer = _fireRate;
         
-        //Setear el follow target al cumplir la condicion correcta (piensen cual puede ser esa condicion)
-        
+        _ragdoll.DisableRagdoll();
+        /* _randomMeshIndex = UnityEngine.Random.Range(0, _meshSelector.MecanimAnims.Length);
+
+         _meshSelector.SelectMesh(_randomMeshIndex);
+         _animationController.SetAnimator(_meshSelector.MecanimAnims[_randomMeshIndex]);*/
+
+        if (HasStateAuthority)
+        {
+            _camera = Camera.main;
+            _camera.GetComponent<FollowTarget>().SetTarget(this);
+        }
 
         GameManager.Instance.AddToList(this);
     }
-    
+
     void Update()
     {
-        if (!HasStateAuthority) return;
-        
-        _horizontalInput = Input.GetAxis("Horizontal");
+        _inputController.ArtificialUpdate();
 
-        //Chequear input para ejecutar el salto
-        _isJumpPressed = Input.GetKeyDown(_jumpKey);
+        _isGround = _groundRaycast.IsRaycasting(Vector3.down);
+        //_isInteract = _interactRaycast.IsRaycasting(_characterRotator.transform.forward);
 
-        //Chequear input para ejecutar el disparo
-        _isShootPressed = Input.GetKeyDown(_shootKey);
+        _isJumping = _inputController.IsJumping;
+        _isShooting = _inputController.IsShooted;
+        _isCrouching = _inputController.IsCrouching;
+        _direction = _inputController.Direction;
+        _isRagdoll = _inputController.IsRagdoll;
+
+        _timer -= Runner.DeltaTime;
+        _timer = Mathf.Clamp(_timer, 0, _fireRate);
+
+        _canShootNow = _timer <= 0f;
     }
-
+        
     public override void FixedUpdateNetwork()
     {
-        //llamamos a nuestras funciones de accion en el FixedUpdateNetwork
-        Movement(_horizontalInput);
+        Movement();
 
-        if (_isJumpPressed)
+        if(_isRagdoll)
+        {
+            RPC_ActivateRagdoll(true);
+        }
+        else
+        {
+            RPC_ActivateRagdoll(false);
+        }
+
+        if (_isJumping && _isGround)
         {
             Jump();
-            
-            _isJumpPressed = false;
         }
-        
-        if (_isShootPressed)
+
+        if (_canShootNow && _isShooting)
         {
             SpawnShot();
-            
-            _isShootPressed = false;
+            _timer = _fireRate;
         }
+
+        if (_isCrouching && _isGround)
+        {
+            Crouch();
+        }
+        else
+        {
+            Uncrouch();
+        }
+
+        _characterRotator.RotateDefault(_inputController.Direction);
     }
 
-    void Movement(float xAxi)
+    void Movement()
     {
-        if (xAxi != 0)
-        {
-            //roto el transform hacia donde me estoy moviendo
-            transform.forward = Vector3.right * Mathf.Sign(xAxi);
-            
-            //muevo a traves del rigidbody
-            
+        Vector3 velocity = _direction.normalized * _defaultSpeed;
 
-            if (Mathf.Abs(_rb.Rigidbody.linearVelocity.z) > _speed)//Clampeo la velocidad
-            {
-                var velocity = Vector3.ClampMagnitude(_rb.Rigidbody.linearVelocity, _speed);
+        _rb.Rigidbody.MovePosition(_rb.Rigidbody.position + velocity * Runner.DeltaTime);
 
-                velocity.y = _rb.Rigidbody.linearVelocity.y;
-
-                _rb.Rigidbody.linearVelocity = velocity;
-            }
-        }
-
+        _animationController.SetFloat(AnimParams.Speed, velocity.magnitude);
     }
 
     void Jump()
     {
-        //aplico fuerza al rigidbody
-        _rb.Rigidbody.AddForce(Vector3.up * _jumpForce, ForceMode.Acceleration);
+        _animationController.SetTrigger(AnimParams.Jump);
+        _rb.Rigidbody.linearVelocity = Vector3.up * _jumpForce;
     }
 
     void SpawnShot()
     {
-        //spawneo la bala
-        Runner.Spawn(_bulletPrefab, _bulletSpawnerTransform.position, Quaternion.identity);
+        Runner.Spawn(_bulletPrefab, _bulletSpawnerTransform.position, _bulletSpawnerTransform.rotation, Object.InputAuthority);
+    }
+
+    void Crouch()
+    {
+        _colliderResizer.SetSize(1, new Vector3(0, -0.5f, 0));
+    }
+
+    void Uncrouch()
+    {
+        _colliderResizer.SetSize(2, new Vector3(0, 0, 0));
     }
 
     //Hacer una funcion local para recibir daño y que llame a la funcion de morir cuando la vida sea <= 0
     void TakeDamage(float damage)
     {
+        if (!HasStateAuthority) return;
+
         if (damage <= 0) return;
 
-        _currentHealth -= damage;
-
-        _currentHealth = MathF.Min(_currentHealth - damage, _maxLife);
+        _currentHealth = MathF.Max(_currentHealth - damage, 0);
 
         if (_currentHealth <= 0)
         {
             Death();
         }
     }
-
 
     //Hacer una funcion networkeada para recibir daño que llame a la funcion local de recibir daño.
     [Rpc]
@@ -135,13 +179,26 @@ public class Player : NetworkBehaviour
         TakeDamage(damage);
     }
 
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_ActivateRagdoll(bool activate)
+    {
+        if (activate)
+        {
+            _ragdoll.ActivateRagdoll();
+        }
+        else
+        {
+            _ragdoll.DisableRagdoll();
+        }
+    }
+
     void Death()
     {
-        Debug.Log("Mori :(");
-
         //Llamo a la funcion de derrota del game manager y paso mi local player
         GameManager.Instance.RPC_Defeat(Runner.LocalPlayer);
 
-        Runner.Despawn(Object);
+        RPC_ActivateRagdoll(true);
+
+        //Runner.Despawn(Object);
     }
 }

@@ -1,12 +1,10 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FollowTarget : MonoBehaviour
 {
     private Transform _targetTransform;
-    
+    [SerializeField] private Vector3 _offset;
+
     public void SetTarget(Player player)
     {
         _targetTransform = player.transform;
@@ -15,11 +13,8 @@ public class FollowTarget : MonoBehaviour
     private void LateUpdate()
     {
         if (!_targetTransform) return;
-        
-        var newPosition = transform.position;
 
-        newPosition.z = _targetTransform.position.z;
-
-        transform.position = newPosition;
+        transform.position = _targetTransform.position + _offset;
+        transform.LookAt(_targetTransform);
     }
 }

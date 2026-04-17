@@ -11,19 +11,19 @@ public class PlayerSpawner : SimulationBehaviour, IPlayerJoined
     //bool interno que indica si ya hay la cantidad de jugadores necesaria para jugar (2 segun la consigna)
     [SerializeField] int _minPlayersCount = 2;
     private bool _initialized;
-    
+
     //Se ejecuta por CADA cliente conectado
-    public void PlayerJoined(PlayerRef player)
+    void IPlayerJoined.PlayerJoined(PlayerRef player)
     {
         var playersCount = Runner.SessionInfo.PlayerCount;
-        
+
         //si el primer cliente ya espero al 2do spawneo un prefab en la 1era posicion
         if (_initialized && playersCount >= _minPlayersCount)
         {
             CreatePlayer(0);
             return;
         }
-        
+
         //Si el cliente que entro, es el mismo cliente donde corre este codigo, entonces:
         if (player == Runner.LocalPlayer)
         {
@@ -37,7 +37,7 @@ public class PlayerSpawner : SimulationBehaviour, IPlayerJoined
             {
                 CreatePlayer(1);
             }
-            
+
         }
     }
 
@@ -45,9 +45,6 @@ public class PlayerSpawner : SimulationBehaviour, IPlayerJoined
     {
         _initialized = false;
 
-        //consigo la posicion y rotacion del spawn point correspondiente
         Runner.Spawn(_playerPrefab, _spawnTransforms[spawnPointIndex].position, Quaternion.identity);
-        
-        //spawneo el prefab en la posicion y rotacion correcta
     }
 }

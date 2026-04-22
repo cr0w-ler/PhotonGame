@@ -22,6 +22,7 @@ public class Player : NetworkBehaviour
 
     [Header("Shoot")]
     [SerializeField] float _fireRate = 0.5f;
+    [SerializeField] VFXPlayer _shootVFX;
     float _timer;
 
     [SerializeField] Ragdoll _ragdoll;
@@ -37,6 +38,8 @@ public class Player : NetworkBehaviour
 
     bool _isGround;
     //bool _isInteract;
+    [Networked] public bool _isDead { get; private set; }
+
     bool _isJumping;
     bool _isShooting;
     bool _canShootNow;
@@ -94,7 +97,6 @@ public class Player : NetworkBehaviour
         
         _isShooting = _inputController.IsShootPressed;
         _direction = _inputController.DirectionPressed;
-        _isRagdoll = _inputController.IsRagdollPressed;
 
         _timer -= Runner.DeltaTime;
         _timer = Mathf.Clamp(_timer, 0, _fireRate);
@@ -110,7 +112,7 @@ public class Player : NetworkBehaviour
     {
         Movement();
 
-        if(_isRagdoll)
+        if(_isDead)
         {
             RPC_ActivateRagdoll(true);
         }
@@ -162,6 +164,7 @@ public class Player : NetworkBehaviour
 
     void SpawnShot()
     {
+        RPC_PlayShootVFX();
         Runner.Spawn(_bulletPrefab, _bulletSpawnerTransform.position, _bulletSpawnerTransform.rotation, Object.InputAuthority);
     }
 
@@ -193,7 +196,7 @@ public class Player : NetworkBehaviour
     }
 
     //Hacer una funcion networkeada para recibir daño que llame a la funcion local de recibir daño.
-    [Rpc]
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
     public void RPC_TakeDamage(float damage)
     {
         TakeDamage(damage);
@@ -217,8 +220,15 @@ public class Player : NetworkBehaviour
         //Llamo a la funcion de derrota del game manager y paso mi local player
         GameManager.Instance.RPC_Defeat(Runner.LocalPlayer);
 
-        RPC_ActivateRagdoll(true);
+        _isDead = true;
+        //RPC_ActivateRagdoll(true);
 
         //Runner.Despawn(Object);
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    void RPC_PlayShootVFX()
+    {
+        _shootVFX.PlayVFX();
     }
 }

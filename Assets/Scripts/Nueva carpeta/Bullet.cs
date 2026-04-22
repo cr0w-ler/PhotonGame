@@ -43,6 +43,14 @@ public class Bullet : NetworkBehaviour
         {
             player.RPC_TakeDamage(_damage);
         }
+        
+        if(other.TryGetComponent(out NetworkBehaviour netObj))
+        {
+            if (netObj is IDamageable dmg)
+            {
+                dmg.RPC_TakeDamage(_damage);
+            }
+        }
 
         Runner.Despawn(Object);
     }

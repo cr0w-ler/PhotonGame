@@ -4,7 +4,6 @@ using UnityEngine.UI;
 
 public class MyMainMenu : NetworkBehaviour
 {
-    [SerializeField] NetworkRunner _runner;
     [SerializeField] GameObject _menuUI;
     [SerializeField] Button _connectButton;
     [SerializeField] Button _exitButton;

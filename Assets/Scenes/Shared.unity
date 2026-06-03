@@ -920,7 +920,7 @@ MonoBehaviour:
   _spawnTransforms:
   - {fileID: 1416014212}
   - {fileID: 685015655}
-  _minPlayersCount: 1
+  _minPlayersCount: 2
 --- !u!1 &504663576
 GameObject:
   m_ObjectHideFlags: 0
@@ -986,19 +986,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: bca6e39ac6cbbcf4ab6c673d8fd44c94, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.99837625
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: bca6e39ac6cbbcf4ab6c673d8fd44c94, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: bca6e39ac6cbbcf4ab6c673d8fd44c94, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: bca6e39ac6cbbcf4ab6c673d8fd44c94, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.056964684
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: bca6e39ac6cbbcf4ab6c673d8fd44c94, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -1010,7 +1010,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: bca6e39ac6cbbcf4ab6c673d8fd44c94, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: -6.531
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: bca6e39ac6cbbcf4ab6c673d8fd44c94, type: 3}
       propertyPath: m_Name
@@ -1132,14 +1132,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f340115afeda36048ab9fc3b89424924, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _explosionRadius: 5
-  _explosionHeight: 0
-  _explosionForce: 15
+  _explosionVFX: {fileID: 8789553730272569467, guid: 21fd167657f1ed240b28f4fa4e3010e7, type: 3}
+  _explosionRadius: 10
+  _explosionHeight: 1
+  _explosionForce: 500
   _damage: 1000
   _maxHealth: 100
   _layerMask:
     serializedVersion: 2
-    m_Bits: 10496
+    m_Bits: 8448
+  _capacityArray: 50
   __currentHealth: 0
 --- !u!1 &546304653
 GameObject:
@@ -3421,7 +3423,7 @@ Terrain:
   m_StaticShadowCaster: 0
   m_IgnoreQualitySettings: 0
   m_ReflectionProbeUsage: 1
-  m_MaterialTemplate: {fileID: 2100000, guid: 594ea882c5a793440b60ff72d896021e, type: 2}
+  m_MaterialTemplate: {fileID: 2100000, guid: 67c3be2ba90b8984d8d097346f8b6af5, type: 2}
   m_BakeLightProbesForTrees: 1
   m_PreserveTreePrototypeLayers: 0
   m_DeringLightProbesForTrees: 1

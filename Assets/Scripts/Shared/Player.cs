@@ -26,7 +26,7 @@ public class Player : NetworkBehaviour
     float _timer;
 
     [SerializeField] Ragdoll _ragdoll;
-    [SerializeField] Bullet _bulletPrefab;
+    [SerializeField] BulletShared _bulletPrefab;
     [SerializeField] Transform _bulletSpawnerTransform;
     [SerializeField] CharacterColliderResizer _colliderResizer;
     [SerializeField] CharacterRotator _characterRotator;
@@ -35,7 +35,6 @@ public class Player : NetworkBehaviour
     [SerializeField] InteractRaycast _interactRaycast;
     //[SerializeField] CharacterMeshSelector _meshSelector;
     [SerializeField] CharacterAnimationController _animationController;
-
     bool _isGround;
     //bool _isInteract;
     [Networked] public bool _isDead { get; private set; }
@@ -44,7 +43,6 @@ public class Player : NetworkBehaviour
     bool _isShooting;
     bool _canShootNow;
     bool _isCrouching;
-    bool _isRagdoll;
     bool _isOnAir;
     Camera _camera;
     NetworkRigidbody3D _rb;
@@ -76,10 +74,11 @@ public class Player : NetworkBehaviour
 
     void Update()
     {
+        if (_isDead) return;
+
         _inputController.ArtificialUpdate();
 
         _isGround = _groundRaycast.IsRaycasting(Vector3.down);
-        //_isInteract = _interactRaycast.IsRaycasting(_characterRotator.transform.forward);
 
         if(_inputController.IsJumpPressed && _isGround)
         {
@@ -98,11 +97,6 @@ public class Player : NetworkBehaviour
         _isShooting = _inputController.IsShootPressed;
         _direction = _inputController.DirectionPressed;
 
-        _timer -= Runner.DeltaTime;
-        _timer = Mathf.Clamp(_timer, 0, _fireRate);
-
-        _canShootNow = _timer <= 0f;
-
         _isOnAir = !_isGround;
 
         _animationController.SetBool(AnimParams.Air, _isOnAir);
@@ -112,7 +106,12 @@ public class Player : NetworkBehaviour
     {
         Movement();
 
-        if(_isDead)
+        _timer -= Runner.DeltaTime;
+        _timer = Mathf.Clamp(_timer, 0, _fireRate);
+
+        _canShootNow = _timer <= 0f;
+
+        if (_isDead)
         {
             RPC_ActivateRagdoll(true);
         }

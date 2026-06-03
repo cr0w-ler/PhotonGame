@@ -1,7 +1,7 @@
 using Fusion;
 using UnityEngine;
 
-public class Bullet : NetworkBehaviour
+public class BulletShared : NetworkBehaviour
 {
     [SerializeField] private float _speed;
     [SerializeField] private int _damage;

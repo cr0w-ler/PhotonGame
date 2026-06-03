@@ -7,6 +7,8 @@ public class Ragdoll : NetworkBehaviour
     [SerializeField] NetworkRigidbody3D[] _ragdollRBs;
     [SerializeField] NetworkMecanimAnimator _animatorNetwork;
     [SerializeField] Animator _animator;
+    [SerializeField] Collider _collider;
+    [SerializeField] NetworkRigidbody3D _mainRB;
 
     public void DisableRagdoll()
     {
@@ -17,17 +19,20 @@ public class Ragdoll : NetworkBehaviour
 
         _animator.enabled = true;
         _animatorNetwork.enabled = true;
+        _collider.enabled = true;
+        _mainRB.Rigidbody.isKinematic = false;
     }
 
     public void ActivateRagdoll()
     {
         _animator.enabled = false;
-        _animatorNetwork.enabled = false;
+        _animatorNetwork.enabled = false;   
+        _collider.enabled = false;
+        _mainRB.Rigidbody.isKinematic = true;
 
         foreach (var rb in _ragdollRBs)
         {
             rb.Rigidbody.isKinematic = false;
-        }
-
+        } 
     }
 }

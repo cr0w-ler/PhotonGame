@@ -1,4 +1,3 @@
-using System;
 using Fusion;
 using Fusion.Addons.Physics;
 using UnityEngine;
@@ -10,24 +9,18 @@ public class Player : NetworkBehaviour
     [SerializeField] float _sprintSpeed = 6f;
     [SerializeField] float _jumpForce = 5f;
 
-    [Header("Lifes")]
-    [SerializeField] int _maxLife;
-    [Networked] float Health { get; set; }
-    [Networked] public float _currentHealth { get; private set; }
-
     [Header("Crouch")]
     [SerializeField] float _crouchSpeed = 3f;
     [SerializeField] float _crouchColHeight = 1f;
     [SerializeField] float _crouchColCenter = 1f;
 
-    [Header("Shoot")]
-    [SerializeField] float _fireRate = 0.5f;
-    [SerializeField] VFXPlayer _shootVFX;
-    float _timer;
+    [Header("Weapon")]
+    [SerializeField] Weapon _weapon;
+
+    [Header("Life")]
+    [SerializeField] HealthSystem _health;
 
     [SerializeField] Ragdoll _ragdoll;
-    [SerializeField] BulletShared _bulletPrefab;
-    [SerializeField] Transform _bulletSpawnerTransform;
     [SerializeField] CharacterColliderResizer _colliderResizer;
     [SerializeField] CharacterRotator _characterRotator;
     [SerializeField] CharacterInputController _inputController;
@@ -36,12 +29,9 @@ public class Player : NetworkBehaviour
     //[SerializeField] CharacterMeshSelector _meshSelector;
     [SerializeField] CharacterAnimationController _animationController;
     bool _isGround;
-    //bool _isInteract;
-    [Networked] public bool _isDead { get; private set; }
-
+    bool _isInteract;
     bool _isJumping;
     bool _isShooting;
-    bool _canShootNow;
     bool _isCrouching;
     bool _isOnAir;
     Camera _camera;
@@ -52,18 +42,17 @@ public class Player : NetworkBehaviour
     public override void Spawned()
     {
         _rb = GetComponent<NetworkRigidbody3D>();
-
-        _currentHealth = _maxLife;
-        _timer = _fireRate;
         
         _ragdoll.DisableRagdoll();
+
+        _health.OnDead += Death;
 
         /*_randomMeshIndex = UnityEngine.Random.Range(0, _meshSelector.MecanimAnims.Length);
 
          _meshSelector.SelectMesh(_randomMeshIndex);
          _animationController.SetAnimator(_meshSelector.MecanimAnims[_randomMeshIndex]);*/
 
-        if (HasStateAuthority)
+        if (HasInputAuthority)
         {
             _camera = Camera.main;
             _camera.GetComponent<FollowTarget>().SetTarget(this);
@@ -74,7 +63,8 @@ public class Player : NetworkBehaviour
 
     void Update()
     {
-        if (_isDead) return;
+        if (_health._isDead) return;
+        if (!HasInputAuthority) return;
 
         _inputController.ArtificialUpdate();
 
@@ -106,12 +96,7 @@ public class Player : NetworkBehaviour
     {
         Movement();
 
-        _timer -= Runner.DeltaTime;
-        _timer = Mathf.Clamp(_timer, 0, _fireRate);
-
-        _canShootNow = _timer <= 0f;
-
-        if (_isDead)
+        if (_health._isDead)
         {
             RPC_ActivateRagdoll(true);
         }
@@ -125,10 +110,9 @@ public class Player : NetworkBehaviour
             Jump();
         }
 
-        if (_canShootNow && _isShooting)
+        if (_weapon._readyToFire && _isShooting)
         {
-            SpawnShot();
-            _timer = _fireRate;
+            _weapon.Fire();
         }
 
         if (_isCrouching && !_isJumping)
@@ -138,6 +122,11 @@ public class Player : NetworkBehaviour
         else
         {
             Uncrouch();
+        }
+
+        if(_isInteract)
+        {
+
         }
 
         _characterRotator.RotateDefault(_inputController.DirectionPressed);
@@ -161,12 +150,6 @@ public class Player : NetworkBehaviour
         _isJumping = false;
     }
 
-    void SpawnShot()
-    {
-        RPC_PlayShootVFX();
-        Runner.Spawn(_bulletPrefab, _bulletSpawnerTransform.position, _bulletSpawnerTransform.rotation, Object.InputAuthority);
-    }
-
     void Crouch()
     {
         _colliderResizer.SetSize(1, new Vector3(0, -0.5f, 0));
@@ -179,29 +162,7 @@ public class Player : NetworkBehaviour
         _animationController.SetBool(AnimParams.Crouch, false);
     }
 
-    //Hacer una funcion local para recibir daño y que llame a la funcion de morir cuando la vida sea <= 0
-    void TakeDamage(float damage)
-    {
-        if (!HasStateAuthority) return;
-
-        if (damage <= 0) return;
-
-        _currentHealth = MathF.Max(_currentHealth - damage, 0);
-
-        if (_currentHealth <= 0)
-        {
-            Death();
-        }
-    }
-
-    //Hacer una funcion networkeada para recibir daño que llame a la funcion local de recibir daño.
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    public void RPC_TakeDamage(float damage)
-    {
-        TakeDamage(damage);
-    }
-
-    [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_ActivateRagdoll(bool activate)
     {
         if (activate)
@@ -216,18 +177,6 @@ public class Player : NetworkBehaviour
 
     void Death()
     {
-        //Llamo a la funcion de derrota del game manager y paso mi local player
         GameManager.Instance.RPC_Defeat(Runner.LocalPlayer);
-
-        _isDead = true;
-        //RPC_ActivateRagdoll(true);
-
-        //Runner.Despawn(Object);
-    }
-
-    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    void RPC_PlayShootVFX()
-    {
-        _shootVFX.PlayVFX();
     }
 }

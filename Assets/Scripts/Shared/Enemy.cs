@@ -53,10 +53,10 @@ public class Enemy : NetworkBehaviour
         SetBoolAttacking(true);
     }
 
-    public void ApplyDamage()
+   /* public void ApplyDamage()
     {
         _player.RPC_TakeDamage(_damage);
-    }
+    }*/
 
     void MoveTo()
     {

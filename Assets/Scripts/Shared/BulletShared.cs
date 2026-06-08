@@ -6,27 +6,24 @@ public class BulletShared : NetworkBehaviour
     [SerializeField] private float _speed;
     [SerializeField] private int _damage;
     [SerializeField] private float _lifeTime;
-
-    private TickTimer _lifeTimer;
+    TickTimer _lifeTimer = TickTimer.None;
 
     public override void Spawned()
     {
-        if (HasStateAuthority)
-        {
-            _lifeTimer = TickTimer.CreateFromSeconds(Runner, _lifeTime);
-        }
+        if (!HasStateAuthority) return;
+        
+        _lifeTimer = TickTimer.CreateFromSeconds(Runner, _lifeTime);
     }
 
     public override void FixedUpdateNetwork()
     {
         Move();
 
-        if (_lifeTimer.ExpiredOrNotRunning(Runner))
+        if (_lifeTimer.Expired(Runner))
         {
-            if (HasStateAuthority)
-            {
-                Runner.Despawn(Object);
-            }
+            _lifeTimer = TickTimer.None;
+
+            Runner.Despawn(Object);
         }
     }
 
@@ -35,21 +32,13 @@ public class BulletShared : NetworkBehaviour
         transform.position += transform.forward * _speed * Runner.DeltaTime;
     }
 
-    private void OnTriggerEnter(Collider other)
+    void OnTriggerEnter(Collider other)
     {
-        if (!HasStateAuthority) return;
+        if (!Object || !Object.HasStateAuthority) return;
 
-        if (other.TryGetComponent(out Player player))
+        if (other.TryGetComponent(out HealthSystem health))
         {
-            player.RPC_TakeDamage(_damage);
-        }
-        
-        if(other.TryGetComponent(out NetworkBehaviour netObj))
-        {
-            if (netObj is IDamageable dmg)
-            {
-                dmg.RPC_TakeDamage(_damage);
-            }
+            health.RPC_TakeDamage(_damage);
         }
 
         Runner.Despawn(Object);

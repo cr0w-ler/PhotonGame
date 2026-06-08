@@ -2,11 +2,11 @@ using System;
 using Fusion;
 using UnityEngine;
 
-[RequireComponent(typeof(LocalInputs))]
+//[RequireComponent(typeof(LocalInputs))]
 public class NetworkPlayer : NetworkBehaviour
 {
     public static NetworkPlayer Local { get; private set; }
-    public LocalInputs LocalInputs { get; private set; }
+    //public LocalInputs LocalInputs { get; private set; }
 
     //se agrego un nickname item
     private NicknameItem _myNickname;
@@ -16,9 +16,9 @@ public class NetworkPlayer : NetworkBehaviour
 
     private ChangeDetector _changeDetector;//se agrego una variable de change detector
 
-    public Action OnDespawned;//crear un evento para cuando el jugador se va de la partida e invocarlo cuando el jugador abandona la partida
+    public event Action OnDespawned;//crear un evento para cuando el jugador se va de la partida e invocarlo cuando el jugador abandona la partida
 
-    public override void Spawned()
+  /*  public override void Spawned()
     {
         LocalInputs = GetComponent<LocalInputs>();
 
@@ -48,11 +48,44 @@ public class NetworkPlayer : NetworkBehaviour
             UpdateNickname();
         }
     }
+*/
+    public override void Spawned()
+    {
+        //LocalInputs = GetComponent<LocalInputs>();
+
+        _changeDetector = GetChangeDetector(ChangeDetector.Source.SimulationState);
+
+        _myNickname = NicknameHandler.Instance.AddNickname(this);
+
+        if (Object.HasInputAuthority)
+        {
+            Local = this;
+           // LocalInputs.enabled = true;
+
+            NetworkString<_16> loadedNick;
+
+            if (PlayerPrefs.HasKey("Nickname"))
+            {
+                loadedNick = PlayerPrefs.GetString("Nickname");
+            }
+            else
+            {
+                loadedNick = $"Player {Runner.LocalPlayer.PlayerId}";
+            }
+
+            RPC_SetNickname(loadedNick);
+        }
+        else
+        {
+            //LocalInputs.enabled = false;
+            UpdateNickname();
+        }
+    }
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
         // Avisamos a los suscriptores (NicknameHandler destruirá el NicknameItem)
-        OnDespawned?.Invoke();
+        OnDespawned();
 
         if (Local == this)
             Local = null;
@@ -75,13 +108,13 @@ public class NetworkPlayer : NetworkBehaviour
 
     //Crear metodo networkeado para setear nickname en la red
     [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
-    private void RPC_SetNickname(string newNickname)
+    private void RPC_SetNickname(NetworkString<_16> newNickname)
     {
         Nickname = newNickname;
 
         if (Object.HasInputAuthority)
         {
-            PlayerPrefs.SetString("PLAYER_NICKNAME", newNickname);
+            PlayerPrefs.SetString("PLAYER_NICKNAME", newNickname.Value);
             PlayerPrefs.Save();
         }
     }
@@ -91,7 +124,7 @@ public class NetworkPlayer : NetworkBehaviour
         if (_myNickname == null)
             return;
 
-        _myNickname.UpdateText(Nickname.ToString());
+        _myNickname.UpdateText(Nickname.Value);
         //Updateo mi nickname
     }
 }

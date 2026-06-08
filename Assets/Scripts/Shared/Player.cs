@@ -29,10 +29,10 @@ public class Player : NetworkBehaviour
     //[SerializeField] CharacterMeshSelector _meshSelector;
     [SerializeField] CharacterAnimationController _animationController;
     bool _isGround;
-    bool _isInteract;
+/*    bool _isInteract;
     bool _isJumping;
     bool _isShooting;
-    bool _isCrouching;
+    bool _isCrouching;*/
     bool _isOnAir;
     Camera _camera;
     NetworkRigidbody3D _rb;
@@ -66,11 +66,9 @@ public class Player : NetworkBehaviour
         if (_health._isDead) return;
         if (!HasInputAuthority) return;
 
-        _inputController.ArtificialUpdate();
-
         _isGround = _groundRaycast.IsRaycasting(Vector3.down);
-
-        if(_inputController.IsJumpPressed && _isGround)
+        Debug.Log(_isGround);
+        /*if(_inputController.IsJumpPressed && _isGround)
         {
             _isJumping = true;
         }
@@ -84,8 +82,8 @@ public class Player : NetworkBehaviour
             _isCrouching = false;
         }
         
-        _isShooting = _inputController.IsShootPressed;
-        _direction = _inputController.DirectionPressed;
+        _isShooting = _inputController.IsFirePressed;
+        _direction = _inputController.MovementInput;*/
 
         _isOnAir = !_isGround;
 
@@ -94,6 +92,13 @@ public class Player : NetworkBehaviour
         
     public override void FixedUpdateNetwork()
     {
+        if (!GetInput(out NetworkInputData inputs)) return;
+
+        _inputController.ApplyInputs(inputs);
+
+        _direction = _inputController.MovementInput;
+
+
         Movement();
 
         if (_health._isDead)
@@ -105,17 +110,19 @@ public class Player : NetworkBehaviour
             RPC_ActivateRagdoll(false);
         }
 
-        if (_isJumping && !_isCrouching)
+        if (inputs.networkButtons.IsSet(MyButtons.Jump) && _inputController.IsJumpPressed)
         {
             Jump();
         }
 
-        if (_weapon._readyToFire && _isShooting)
+        if (inputs.networkButtons.IsSet(MyButtons.Shoot) && _weapon._readyToFire)
         {
             _weapon.Fire();
         }
 
-        if (_isCrouching && !_isJumping)
+        
+
+        if (inputs.networkButtons.IsSet(MyButtons.Crouch) && _inputController.IsCrouchPressed && !_inputController.IsJumpPressed)
         {
             Crouch();
         }
@@ -124,12 +131,12 @@ public class Player : NetworkBehaviour
             Uncrouch();
         }
 
-        if(_isInteract)
+        if(inputs.networkButtons.IsSet(MyButtons.Interact))
         {
 
         }
 
-        _characterRotator.RotateDefault(_inputController.DirectionPressed);
+        _characterRotator.RotateDefault(_inputController.MovementInput);
     }
 
     void Movement()
@@ -143,11 +150,11 @@ public class Player : NetworkBehaviour
 
     void Jump()
     {
-        if(!_isJumping) return;
+        //if(!_isJumping) return;
 
         _animationController.SetTrigger(AnimParams.Jump);
         _rb.Rigidbody.linearVelocity = Vector3.up * _jumpForce;
-        _isJumping = false;
+        //_isJumping = false;
     }
 
     void Crouch()

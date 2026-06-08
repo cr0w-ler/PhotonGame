@@ -19,7 +19,6 @@ public class Weapon : NetworkBehaviour
     public override void FixedUpdateNetwork()
     {
         _readyToFire = _tickTimer.Expired(Runner);
-        Debug.Log("Pos " +_shotSpawnTransform.position);
     }
 
     public void Fire()

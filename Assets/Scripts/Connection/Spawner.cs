@@ -28,10 +28,10 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
 
         if (!NetworkPlayer.Local) return;
         
-        /*if(!_localInputs)
-            _localInputs = NetworkPlayer.Local.LocalInputs;*/
+        if(!_localInputs)
+            _localInputs = NetworkPlayer.Local.LocalInputs;
 
-        //input.Set(_localInputs.GetLocalInputs());
+        input.Set(_localInputs.GetLocalInputs());
        
     }
 

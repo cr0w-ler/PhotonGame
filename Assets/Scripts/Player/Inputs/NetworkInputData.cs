@@ -1,14 +1,23 @@
 using Fusion;
+using UnityEngine;
 
 public struct NetworkInputData : INetworkInput
 {
-    public float movementInput;
-    public NetworkBool isFirePressed;
+    public Vector3 MovementInput;
+    public NetworkBool IsFirePressed;
+    public NetworkBool IsJumpPressed;
+    public NetworkBool IsSprintPressed;
+    public NetworkBool IsCrouchPressed;
+    public NetworkBool IsInteractPressed;
 
     public NetworkButtons networkButtons;
 }
 
 enum MyButtons
 {
-    Jump = 0,
+    Jump,
+    Shoot,
+    Sprint,
+    Crouch,
+    Interact
 }

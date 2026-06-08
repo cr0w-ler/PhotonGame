@@ -10,6 +10,9 @@ public class HealthSystem : NetworkBehaviour
 
     public event Action OnDead = delegate { };
     public event Action<float> OnHealthChanged = delegate { };
+    public event Action OnRespawn = delegate { };
+
+    public event Action OnLeft = delegate { };
 
     public override void Spawned()
     {

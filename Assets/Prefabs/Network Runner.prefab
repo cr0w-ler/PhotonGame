@@ -61,6 +61,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _playerPrefab:
     RawGuidValue: eb91ab21e1ff65c45a775551608b5d53
+  _minPlayersToStart: 2
+  _spawnPoints: []
+  _waitingUI: {fileID: 0}
 --- !u!114 &4874015857150909375
 MonoBehaviour:
   m_ObjectHideFlags: 0

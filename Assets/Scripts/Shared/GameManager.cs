@@ -8,7 +8,6 @@ public class GameManager : NetworkBehaviour
 
     [SerializeField] private GameObject _winImage;
     [SerializeField] private GameObject _loseImage;
-
     private List<PlayerRef> _players;//PlayerRef sirve como identificacion de cada cliente conectado
 
     private void Awake()
@@ -30,34 +29,41 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    void RemoveFromList(PlayerRef player)
+    [Rpc(RpcSources.All, RpcTargets.All)]
+    public void RPC_Defeat(PlayerRef loser)
     {
-        if (_players.Contains(player))
+        _players.Remove(loser);
+
+        if (loser == Runner.LocalPlayer)
+            ShowDefeatPanel();
+
+        if (!HasStateAuthority) return;
+
+        switch (_players.Count)
         {
-            _players.Remove(player);
+            case 1:
+                RPC_Win(_players[0]);
+                break;
+
+            case 0:
+                RPC_Draw();
+                break;
         }
     }
 
-    [Rpc]
-    public void RPC_Defeat(PlayerRef player)
+    //[RpcTarget] El llamado del RPC va a ir dirigido a ese jugador
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_Win(PlayerRef winner)
     {
-        //si el player que perdio es el local llamo al metodo local de derrota
-        if (player == Runner.LocalPlayer)
-            ShowDefeatPanel();
-
-        //Llamo al metodo para removerme de la lista
-        _players.Remove(player);
-
-        //si queda un solo jugadore en _players y tengo state authority llamo a la victoria
-        if (_players.Count == 1 && HasStateAuthority)
-            RPC_Win(_players[0]);
+        if (winner == Runner.LocalPlayer)
+            ShowWinPanel();
     }
 
-    //[RpcTarget] El llamado del RPC va a ir dirigido a ese jugador
-    [Rpc]
-    void RPC_Win([RpcTarget] PlayerRef player)
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_Draw()
     {
-        ShowWinPanel();
+        ShowDefeatPanel();
+        Debug.Log("[GameManager] Match ended in a draw.");
     }
 
     void ShowWinPanel()

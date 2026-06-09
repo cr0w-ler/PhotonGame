@@ -7,16 +7,39 @@ using Fusion.Sockets;
 public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
 {
     [SerializeField] private NetworkPrefabRef _playerPrefab;
-
+    [SerializeField] private int _minPlayersToStart = 2;
+    [SerializeField] private Transform[] _spawnPoints;
+    private bool _matchStarted;
     private LocalInputs _localInputs;
-    
+    private int _playerIndex = 0;
+
+    private void RefreshSpawnPoints()
+    {
+        var points = FindObjectsByType<PlayerSpawnPoint>(FindObjectsSortMode.None);
+        _spawnPoints = new Transform[points.Length];
+        for (int i = 0; i < points.Length; i++)
+            _spawnPoints[i] = points[i].transform;
+    }
+
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        if (runner.IsServer)
+        if (!runner.IsServer) return;
+
+        if (_matchStarted)
         {
-            runner.Spawn(_playerPrefab, Vector3.zero, Quaternion.identity, player);
+            SpawnPlayer(runner, player, _playerIndex++ % Mathf.Max(_spawnPoints.Length, 1));
+            return;
         }
-    
+
+        int count = runner.SessionInfo.PlayerCount;
+
+        if (count >= _minPlayersToStart)
+        {
+            _matchStarted = true;
+            int index = 0;
+            foreach (PlayerRef p in runner.ActivePlayers)
+                SpawnPlayer(runner, p, index++ % Mathf.Max(_spawnPoints.Length, 1));
+        }
     }
 
     public void OnInput(NetworkRunner runner, NetworkInput input)//vamos a usar el callback de OnInput
@@ -24,20 +47,29 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
         //Solo si soy local //consigo los local inputs //seteo los inputs
 
         if (!NetworkPlayer.Local) return;
-        
-        if(!_localInputs)
+
+        if (!_localInputs)
             _localInputs = NetworkPlayer.Local.LocalInputs;
 
+        if (!_localInputs) return;
+
         input.Set(_localInputs.GetLocalInputs());
-       
+    }
+
+    private void SpawnPlayer(NetworkRunner runner, PlayerRef player, int spawnIndex)
+    {
+        Vector3 pos = _spawnPoints is { Length: > 0 }
+            ? _spawnPoints[spawnIndex].position
+            : Vector3.zero;
+
+        runner.Spawn(_playerPrefab, pos, Quaternion.identity, player);
     }
 
     public void OnDisconnectedFromServer(NetworkRunner runner, NetDisconnectReason reason)
     {
         runner.Shutdown();
     }
-    
-    
+
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player) { }
 
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input) { }
@@ -49,7 +81,7 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
     public void OnSessionListUpdated(NetworkRunner runner, List<SessionInfo> sessionList) { }
     public void OnCustomAuthenticationResponse(NetworkRunner runner, Dictionary<string, object> data) { }
     public void OnHostMigration(NetworkRunner runner, HostMigrationToken hostMigrationToken) { }
-    public void OnSceneLoadDone(NetworkRunner runner) { }
+    public void OnSceneLoadDone(NetworkRunner runner) { RefreshSpawnPoints(); }
     public void OnSceneLoadStart(NetworkRunner runner) { }
     public void OnObjectExitAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player){ }
     public void OnObjectEnterAOI(NetworkRunner runner, NetworkObject obj, PlayerRef player){ }

@@ -23,7 +23,7 @@ public class WeaponView : NetworkBehaviour
     {
         if (_coroutine == null)
         {
-            StartCoroutine(LightCoroutine());
+            _coroutine = StartCoroutine(LightCoroutine());
         }
 
         RPC_PlayShootVFX();
@@ -38,13 +38,13 @@ public class WeaponView : NetworkBehaviour
         _coroutine = null;
     }
 
-    [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     void RPC_PlayShootVFX()
     {
         _shootVFX.Play();
     }
 
-    [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     void RPC_PlayShootSFX()
     {
         _audioSource.Play();

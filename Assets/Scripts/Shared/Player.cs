@@ -73,6 +73,8 @@ public class Player : NetworkBehaviour
 
     void Death()
     {
+        if (!HasStateAuthority) return;
+
         GameManager.Instance.RPC_Defeat(Runner.LocalPlayer);
     }
 }

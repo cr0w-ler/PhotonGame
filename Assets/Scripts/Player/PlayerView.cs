@@ -42,8 +42,8 @@ public class PlayerView : NetworkBehaviour
         }
     }
 
-    void EnableMeshRender(bool isDead)
+    /*void EnableMeshRender(bool isDead)
     {
         _playerVisual.SetActive(!isDead);
-    }
+    }*/
 }

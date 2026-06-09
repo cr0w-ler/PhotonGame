@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,13 +17,13 @@ public class MainMenuHandler : MonoBehaviour
     [SerializeField] private Button _hostPanelBTN;
     [SerializeField] private Button _hostGameBTN;
 
-    [Header("InputFields")] 
+    [Header("InputFields")]
     [SerializeField] private TMP_InputField _sessionName;
-    //Agregar un input field para setear nuestro nickname
+    [SerializeField] private TMP_InputField _nicknameField;
 
     [Header("Texts")]
     [SerializeField] private TMP_Text _statusText;
-    
+
     void Start()
     {
         _joinLobbyBTN.onClick.AddListener(Btn_JoinLobby);
@@ -42,8 +40,9 @@ public class MainMenuHandler : MonoBehaviour
     void Btn_JoinLobby()
     {
         _networkRunnerHandler.JoinLobby();
-        //Guardo el nickname en algun lado dentro del proyecto (ej: player prefs)
-        
+
+        PlayerPrefs.SetString("Nickname", _nicknameField.text);
+
         _initialPanel.SetActive(false);
         _statusPanel.SetActive(true);
 
@@ -55,11 +54,11 @@ public class MainMenuHandler : MonoBehaviour
         _sessionBrowserPanel.SetActive(false);
         _hostGamePanel.SetActive(true);
     }
-    
+
     void Btn_CreateGameSession()
     {
         _hostGameBTN.interactable = false;
-        
+
         _networkRunnerHandler.CreateGame(_sessionName.text, "Game");
     }
 }

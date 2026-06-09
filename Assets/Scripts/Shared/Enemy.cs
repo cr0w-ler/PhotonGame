@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class Enemy : NetworkBehaviour
 {
-    [SerializeField] float _maxLife = 100f;
-    private float _currentLife;
     [SerializeField] float _speed = 5f;
 
     [SerializeField] NetworkRigidbody3D _rb;
@@ -22,7 +20,7 @@ public class Enemy : NetworkBehaviour
 
     public override void Spawned()
     {
-        _currentLife = _maxLife;
+        
     }
 
     public override void FixedUpdateNetwork()
@@ -48,7 +46,7 @@ public class Enemy : NetworkBehaviour
     {
         if (_isAttacking) return;
 
-        _mecanimAnimator.Animator.SetBool(AnimParams.Attack, true);
+        //_mecanimAnimator.Animator.SetBool(AnimParams.Attack, true);
 
         SetBoolAttacking(true);
     }
@@ -72,23 +70,5 @@ public class Enemy : NetworkBehaviour
     public void SetBoolAttacking(bool attacking)
     {
         _isAttacking = attacking;
-    }
-
-    [Rpc(RpcSources.All, RpcTargets.All)]
-    public void RPC_TakeDamage(float damage)
-    {
-        TakeDamage(damage);
-    }
-
-    private void TakeDamage(float damage)
-    {
-        if(damage <= 0) return;
-
-        _currentLife = Mathf.Max(_currentLife - damage, 0);
-
-        if (_currentLife <= 0)
-        {
-            Runner.Despawn(Object);
-        }
     }
 }

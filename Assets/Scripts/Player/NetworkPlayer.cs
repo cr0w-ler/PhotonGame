@@ -16,7 +16,7 @@ public class NetworkPlayer : NetworkBehaviour
 
     private ChangeDetector _changeDetector;//se agrego una variable de change detector
 
-    public event Action OnDespawned;//crear un evento para cuando el jugador se va de la partida e invocarlo cuando el jugador abandona la partida
+    public event Action OnLeft = delegate { };//crear un evento para cuando el jugador se va de la partida e invocarlo cuando el jugador abandona la partida
 
     public override void Spawned()
     {
@@ -32,7 +32,7 @@ public class NetworkPlayer : NetworkBehaviour
             LocalInputs.enabled = true;
 
             NetworkString<_16> loadedNick;
-
+            
             if (PlayerPrefs.HasKey("Nickname"))
             {
                 loadedNick = PlayerPrefs.GetString("Nickname");
@@ -54,10 +54,7 @@ public class NetworkPlayer : NetworkBehaviour
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
         // Avisamos a los suscriptores (NicknameHandler destruirá el NicknameItem)
-        OnDespawned();
-
-        if (Local == this)
-            Local = null;
+        OnLeft();
     }
 
     public override void Render()
@@ -80,19 +77,10 @@ public class NetworkPlayer : NetworkBehaviour
     private void RPC_SetNickname(NetworkString<_16> newNickname)
     {
         Nickname = newNickname;
-
-        if (Object.HasInputAuthority)
-        {
-            PlayerPrefs.SetString("PLAYER_NICKNAME", newNickname.Value);
-            PlayerPrefs.Save();
-        }
     }
 
     void UpdateNickname()
     {
-        if (_myNickname == null)
-            return;
-
         _myNickname.UpdateText(Nickname.Value);
         //Updateo mi nickname
     }

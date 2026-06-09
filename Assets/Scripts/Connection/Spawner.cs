@@ -40,6 +40,11 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
             foreach (PlayerRef p in runner.ActivePlayers)
                 SpawnPlayer(runner, p, index++ % Mathf.Max(_spawnPoints.Length, 1));
         }
+
+       /* if (runner.IsServer) //work nicknames
+        {
+            runner.Spawn(_playerPrefab, null, null, player);
+        }*/
     }
 
     public void OnInput(NetworkRunner runner, NetworkInput input)//vamos a usar el callback de OnInput
@@ -48,10 +53,7 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
 
         if (!NetworkPlayer.Local) return;
 
-        if (!_localInputs)
-            _localInputs = NetworkPlayer.Local.LocalInputs;
-
-        if (!_localInputs) return;
+        _localInputs ??= NetworkPlayer.Local.LocalInputs;
 
         input.Set(_localInputs.GetLocalInputs());
     }

@@ -19,20 +19,21 @@ public class GameManager : NetworkBehaviour
 
     public void AddToList(Player player)
     {
-        var playerRef = player.Object.StateAuthority;
+        var playerRef = player.Object.InputAuthority;
         //Consigo el objecto con state autority
         //lo agrego a _players si no lo contiene.
 
         if (!_players.Contains(playerRef))
         {
             _players.Add(playerRef);
+            Debug.Log($"[GameManager] Added {playerRef}, total: {_players.Count}");
         }
     }
 
     [Rpc(RpcSources.All, RpcTargets.All)]
     public void RPC_Defeat(PlayerRef loser)
     {
-        _players.Remove(loser);
+        /*_players.Remove(loser);
 
         if (loser == Runner.LocalPlayer)
             ShowDefeatPanel();
@@ -45,6 +46,27 @@ public class GameManager : NetworkBehaviour
                 RPC_Win(_players[0]);
                 break;
 
+            case 0:
+                RPC_Draw();
+                break;
+        }*/
+
+        //Debug.Log($"[GameManager] Defeat called for {loser}, before remove: {_players.Count}");
+
+        bool removed = _players.Remove(loser);
+
+        //Debug.Log($"[GameManager] Removed: {removed}, after remove: {_players.Count}");
+
+        if (loser == Runner.LocalPlayer)
+            ShowDefeatPanel();
+
+        if (!HasStateAuthority) return;
+
+        switch (_players.Count)
+        {
+            case 1:
+                RPC_Win(_players[0]);
+                break;
             case 0:
                 RPC_Draw();
                 break;
@@ -63,7 +85,7 @@ public class GameManager : NetworkBehaviour
     private void RPC_Draw()
     {
         ShowDefeatPanel();
-        Debug.Log("[GameManager] Match ended in a draw.");
+        //Debug.Log("[GameManager] Match ended in a draw.");
     }
 
     void ShowWinPanel()

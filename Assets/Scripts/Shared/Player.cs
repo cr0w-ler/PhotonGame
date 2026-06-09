@@ -23,7 +23,6 @@ public class Player : NetworkBehaviour
 
     public override void Spawned()
     {
-        _health.OnDead += Death;
 
         /*_randomMeshIndex = UnityEngine.Random.Range(0, _meshSelector.MecanimAnims.Length);
 
@@ -69,12 +68,5 @@ public class Player : NetworkBehaviour
         _movement.SetSprint(inputs.networkButtons.IsSet(MyButtons.Sprint));
 
         _characterRotator.RotateDefault(inputs.MovementInput);
-    }
-
-    void Death()
-    {
-        if (!HasStateAuthority) return;
-
-        GameManager.Instance.RPC_Defeat(Runner.LocalPlayer);
     }
 }

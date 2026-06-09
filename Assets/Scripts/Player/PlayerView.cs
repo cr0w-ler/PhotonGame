@@ -19,6 +19,7 @@ public class PlayerView : NetworkBehaviour
         _movement.OnCrouching += OnCrouchAnimation;
 
         _healthSystem.OnDeadChanged += OnDeadStateChanged;
+        _healthSystem.OnRespawn += OnRespawned;
     }
 
     void MoveAnimation(float speed)
@@ -51,5 +52,10 @@ public class PlayerView : NetworkBehaviour
             _ragdoll.ActivateRagdoll();
         else
             _ragdoll.DisableRagdoll();
+    }
+
+    void OnRespawned()
+    {
+        _ragdoll.DisableRagdoll();
     }
 }

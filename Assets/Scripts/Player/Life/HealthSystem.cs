@@ -63,6 +63,7 @@ public class HealthSystem : NetworkBehaviour
 
         CurrentHealth = _maxLife;
         IsDead = false;
+        OnRespawn();
     }
 
     public override void Despawned(NetworkRunner runner, bool hasState)

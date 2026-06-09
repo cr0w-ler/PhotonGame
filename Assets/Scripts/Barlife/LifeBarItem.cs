@@ -9,7 +9,7 @@ public class LifeBarItem : MonoBehaviour
     [SerializeField] private Image _myLifeImage;
     [SerializeField] private float _lerpRate = 0.3f;
 
-    public LifeBarItem SetOwner(LifeHandler owner)
+    public LifeBarItem SetOwner(HealthSystem owner)
     {
         _owner = owner.transform;
         return this;

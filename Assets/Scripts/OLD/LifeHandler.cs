@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class LifeHandler : NetworkBehaviour
 {
-    [Networked, OnChangedRender(nameof(CurrentLifeChanged))]
+   /* [Networked, OnChangedRender(nameof(CurrentLifeChanged))]
     private byte CurrentLife { get; set; }
 
     private const byte MAX_LIFE = 100;
@@ -94,5 +94,5 @@ public class LifeHandler : NetworkBehaviour
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
         OnLeft();
-    }
+    }*/
 }

@@ -19,7 +19,7 @@ public class LifeBarHandler : MonoBehaviour
         _lifeBarsList = new List<LifeBarItem>();
     }
 
-    public LifeBarItem AddLifeBar(LifeHandler owner)
+    public LifeBarItem AddLifeBar(HealthSystem owner)
     {
         if (owner == null) return null;
 

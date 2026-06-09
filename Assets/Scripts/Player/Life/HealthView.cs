@@ -2,15 +2,25 @@ using UnityEngine;
 
 public class HealthView : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    [SerializeField] HealthSystem _health;
+    [SerializeField] LifeBarItem _lifeBarItem;
+
     void Start()
     {
-        
+        _lifeBarItem = LifeBarHandler.Instance.AddLifeBar(_health);
+
+        _health.OnHealthUpdate += UpdateBar;
+        _health.OnLeft += RemoveBar;
     }
 
-    // Update is called once per frame
-    void Update()
+    void UpdateBar(float normalized)
     {
-        
+        _lifeBarItem?.UpdateLife(normalized);
+    }
+
+    void RemoveBar()
+    {
+        _health.OnHealthUpdate -= UpdateBar;
+        _health.OnLeft -= RemoveBar;
     }
 }

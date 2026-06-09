@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class WeaponHandler : NetworkBehaviour
 {
-    [SerializeField] private NetworkPrefabRef _bulletPrefab;
+   /* [SerializeField] private NetworkPrefabRef _bulletPrefab;
     [SerializeField] private Transform _shotSpawnTransform;
 
     public event Action OnShot = delegate { };
@@ -53,5 +53,5 @@ public class WeaponHandler : NetworkBehaviour
         if (!hitInfo.Hitbox.transform.root.TryGetComponent(out LifeHandler player)) return;
         
         player.TakeDamage(25);
-    }
+    }*/
 }

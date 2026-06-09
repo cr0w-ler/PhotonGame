@@ -7,7 +7,7 @@ using UnityEngine;
 [RequireComponent(typeof(WeaponHandler))]
 public class PlayerController : NetworkBehaviour
 {
-    private NetworkCharacterControllerCustom _characterMovement;
+    /*private NetworkCharacterControllerCustom _characterMovement;
     private WeaponHandler _weaponHandler;
     
     public override void Spawned()
@@ -32,9 +32,9 @@ public class PlayerController : NetworkBehaviour
     {
         if (!GetInput(out NetworkInputData inputs)) return;
         
-        /*//Movimiento
+        *//*//Movimiento
         Vector3 moveDirection = Vector3.forward * inputs.movementInput;
-        _characterMovement.Move(moveDirection);*/
+        _characterMovement.Move(moveDirection);*//*
         
         //Salto
         if (inputs.networkButtons.IsSet(MyButtons.Jump))
@@ -43,9 +43,9 @@ public class PlayerController : NetworkBehaviour
         }
         
         //Disparo
-        /*if (inputs.isFirePressed)
+        *//*if (inputs.isFirePressed)
         {
             _weaponHandler.Fire();
-        }*/
-    }
+        }*//*
+    }*/
 }

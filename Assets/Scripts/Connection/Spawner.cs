@@ -21,10 +21,7 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
 
     public void OnInput(NetworkRunner runner, NetworkInput input)//vamos a usar el callback de OnInput
     {
-
-        //Solo si soy local
-        //consigo los local inputs
-        //seteo los inputs
+        //Solo si soy local //consigo los local inputs //seteo los inputs
 
         if (!NetworkPlayer.Local) return;
         

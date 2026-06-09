@@ -5,43 +5,68 @@ using UnityEngine;
 public class HealthSystem : NetworkBehaviour
 {
     [SerializeField] int _maxLife;
-    [Networked] public float _currentHealth { get; private set; }
-    [Networked] public bool _isDead { get; private set; }
+    [Networked, OnChangedRender(nameof(OnHealthChanged))]
+    public float CurrentHealth { get; private set; }
+
+    [Networked, OnChangedRender(nameof(OnDeadStateChanged))]
+    public NetworkBool IsDead { get; private set; }
 
     public event Action OnDead = delegate { };
-    public event Action<float> OnHealthChanged = delegate { };
+    public event Action<float> OnHealthUpdate = delegate { };
+    public event Action<bool> OnDeadChanged = delegate { };
     public event Action OnRespawn = delegate { };
 
     public event Action OnLeft = delegate { };
 
     public override void Spawned()
     {
-        InitializeHealth();
+        if (HasStateAuthority)
+            CurrentHealth = _maxLife;
+        else
+            OnHealthChanged();
     }
 
-    void InitializeHealth()
+    void OnHealthChanged()
     {
-        _currentHealth = _maxLife;
+        OnHealthUpdate(CurrentHealth / _maxLife);
     }
 
-    void TakeDamage(float damage)
+    void OnDeadStateChanged()
     {
-        if (!HasStateAuthority) return;
-
-        if (damage <= 0) return;
-
-        _currentHealth = MathF.Max(_currentHealth - damage, 0);
-
-        if (_currentHealth <= 0)
-        {
-            _isDead = true;
-            OnDead();
-        }
+        OnDeadChanged(IsDead);
     }
 
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
     public void RPC_TakeDamage(float damage)
     {
         TakeDamage(damage);
+    }
+
+    void TakeDamage(float damage)
+    {
+        if (!HasStateAuthority) return;
+
+        if (damage <= 0 || IsDead) return;
+
+        CurrentHealth = MathF.Max(CurrentHealth - damage, 0);
+
+        if (CurrentHealth <= 0)
+        {
+            IsDead = true;
+            OnDead();
+        }
+    }
+
+    public void Resurrect()
+    {
+        if (!HasStateAuthority) return;
+
+        CurrentHealth = _maxLife;
+        IsDead = false;
+    }
+
+    public override void Despawned(NetworkRunner runner, bool hasState)
+    {
+        OnLeft();
     }
 }

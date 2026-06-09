@@ -1,58 +1,49 @@
-using System.Collections;
-using System.Collections.Generic;
 using Fusion;
 using UnityEngine;
 
 public class PlayerView : NetworkBehaviour
 {
-    [SerializeField] private ParticleSystem _shotParticles;
     [SerializeField] private GameObject _playerVisual;
-
-    private NetworkMecanimAnimator _mecanimAnimator;
-
-    [Networked, OnChangedRender(nameof(TriggerShotParticles))] private NetworkBool Firing { get; set; }
+    [SerializeField] CharacterAnimationController _animationController;
+    [SerializeField] CharacterColliderResizer _characterColliderResizer;
+    [SerializeField] MovementComponent _movement;
+    [SerializeField] HealthSystem _healthSystem;
 
     public override void Spawned()
+    {    
+        _movement.OnMoving += MoveAnimation;
+        _movement.OnJumping += JumpAnimation;
+        _movement.OnCrouching += OnCrouchAnimation;
+
+        _healthSystem.OnDead += () => EnableMeshRender(true);
+    }
+
+    void MoveAnimation(float speed)
     {
-        var weaponComponent = GetComponentInParent<WeaponHandler>();
+        _animationController.SetFloat(AnimParams.Speed, speed);
+    }
 
-        if (weaponComponent)
+    void JumpAnimation()
+    {
+        _animationController.SetTrigger(AnimParams.Jump);
+    }
+
+    public void OnCrouchAnimation(bool isCrouching)
+    {
+        if(isCrouching)
         {
-            weaponComponent.OnShot += ()=> Firing = !Firing;
+            _characterColliderResizer.SetSize(1, new Vector3(0, -0.5f, 0));
+            _animationController.SetBool(AnimParams.Crouch, true);
         }
-        
-        var lifeComponent = GetComponentInParent<LifeHandler>();
-
-        if (lifeComponent)
+        else
         {
-            lifeComponent.OnDeadChanged += EnableMeshRender;
-        }
-        
-        _mecanimAnimator = GetComponent<NetworkMecanimAnimator>();
-
-        if (_mecanimAnimator)
-        {
-            var movementComponent = GetComponentInParent<NetworkCharacterControllerCustom>();
-
-            if (movementComponent)
-            {
-                movementComponent.OnMoving += MoveAnimation;
-            }
+            _characterColliderResizer.SetSize(2, new Vector3(0, 0, 0));
+            _animationController.SetBool(AnimParams.Crouch, false);
         }
     }
 
-    void MoveAnimation(float xValue)
+    void EnableMeshRender(bool isDead)
     {
-        _mecanimAnimator.Animator.SetFloat("xAxi", xValue);
-    }
-
-    void TriggerShotParticles()
-    {
-        _shotParticles.Play();
-    }
-
-    void EnableMeshRender(bool e)
-    {
-        _playerVisual.SetActive(!e);
+        _playerVisual.SetActive(!isDead);
     }
 }

@@ -1836,6 +1836,7 @@ GameObject:
   - component: {fileID: 8742799346939261472}
   - component: {fileID: 3006804992704434374}
   - component: {fileID: 638429697167621671}
+  - component: {fileID: 980507585884202409}
   m_Layer: 0
   m_Name: Mesh
   m_TagString: Untagged
@@ -1929,6 +1930,23 @@ MonoBehaviour:
   SyncParent: 0
   _autoAOIOverride: 1
   DisableSharedModeInterpolation: 0
+--- !u!114 &980507585884202409
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4008272967859579818}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34acb2cbde13e694fb972530e94aae5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerVisual: {fileID: 4008272967859579818}
+  _animationController: {fileID: 1354492324558253811}
+  _characterColliderResizer: {fileID: 7302153620256590648}
+  _movement: {fileID: 1472474481005220215}
+  _healthSystem: {fileID: 577549235567698703}
 --- !u!1 &4475836793075372292
 GameObject:
   m_ObjectHideFlags: 0
@@ -3698,11 +3716,12 @@ GameObject:
   - component: {fileID: 1354492324558253811}
   - component: {fileID: 7018230661817068200}
   - component: {fileID: 7302153620256590648}
-  - component: {fileID: 3602893722287817681}
   - component: {fileID: 6110872969121056400}
-  - component: {fileID: -4976625616306008696}
   - component: {fileID: 577549235567698703}
   - component: {fileID: 996544923378881573}
+  - component: {fileID: 5241463851850530982}
+  - component: {fileID: 1472474481005220215}
+  - component: {fileID: 9163944526177952610}
   m_Layer: 8
   m_Name: PlayerNew
   m_TagString: Untagged
@@ -3766,18 +3785,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eae8915e0f796374f939c8597e2b471d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _defaultSpeed: 5
-  _sprintSpeed: 8
-  _jumpForce: 10
-  _crouchSpeed: 3
-  _crouchColHeight: 1
-  _crouchColCenter: 1
   _weapon: {fileID: 3131175870522143492}
   _health: {fileID: 577549235567698703}
+  _movement: {fileID: 1472474481005220215}
   _ragdoll: {fileID: 148318375279938702}
-  _colliderResizer: {fileID: 7302153620256590648}
   _characterRotator: {fileID: 3006804992704434374}
-  _inputController: {fileID: 3602893722287817681}
   _groundRaycast: {fileID: 5919547586218829964}
   _interactRaycast: {fileID: 8742799346939261472}
   _animationController: {fileID: 1354492324558253811}
@@ -3816,14 +3828,13 @@ MonoBehaviour:
   - {fileID: 1354492324558253811}
   - {fileID: 7018230661817068200}
   - {fileID: 7302153620256590648}
-  - {fileID: 3602893722287817681}
-  - {fileID: -4976625616306008696}
   - {fileID: 577549235567698703}
   - {fileID: 996544923378881573}
   - {fileID: 5919547586218829964}
   - {fileID: 8742799346939261472}
   - {fileID: 3006804992704434374}
   - {fileID: 638429697167621671}
+  - {fileID: 980507585884202409}
   - {fileID: 6682171564856445281}
   - {fileID: 5008212325839627716}
   ForceRemoteRenderTimeframe: 0
@@ -3945,24 +3956,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _col: {fileID: 1545289866057654640}
   _mesh: {fileID: 6577554455466185070}
---- !u!114 &3602893722287817681
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8149851260942698101}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c0611b465111a046a17e7f3f337fba1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _jumpKey: 32
-  _shootKey: 323
-  _sprintKey: 304
-  _crouchKey: 306
-  _interactKey: 101
-  _ragdollKey: 114
 --- !u!114 &6110872969121056400
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3976,18 +3969,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxScore: 9999
---- !u!114 &-4976625616306008696
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8149851260942698101}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8a489af85d215664dba2eaabd893aa7a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &577549235567698703
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4001,8 +3982,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxLife: 100
-  __currentHealth: 0
-  __isDead: 0
+  _CurrentHealth: 0
+  _IsDead:
+    _value: 0
 --- !u!114 &996544923378881573
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4015,6 +3997,54 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c15bc3d6a223b204a878b942db04b2e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &5241463851850530982
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8149851260942698101}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f87bbdc20316beb47aa6daa58d9107fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _jumpKey: 32
+  _shootKey: 323
+  _sprintKey: 304
+  _crouchKey: 306
+  _interactKey: 101
+--- !u!114 &1472474481005220215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8149851260942698101}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73b9e4daf6e3a3746a8204994fa50385, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _defaultSpeed: 3
+  _crouchSpeed: 3
+  _sprintSpeed: 6
+  _jumpForce: 5
+  _rb: {fileID: 7824964431430048721}
+--- !u!114 &9163944526177952610
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8149851260942698101}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9aaf49b6af2bef646a0fe894751d13fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _health: {fileID: 577549235567698703}
+  _lifeBarItem: {fileID: 6272192669908321916, guid: e180478af1cf4694cb005d6f0ce10b05, type: 3}
 --- !u!1 &8197445980673343475
 GameObject:
   m_ObjectHideFlags: 0

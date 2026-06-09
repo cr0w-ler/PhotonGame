@@ -33,8 +33,8 @@ public class LocalInputs : MonoBehaviour
         _isJumpPressed |= Input.GetKeyDown(_jumpKey);
         _isFirePressed |= Input.GetKey(_shootKey);
         _isInteractPressed |= Input.GetKeyDown(_interactKey);
-        _isCrouchPressed |= Input.GetKeyDown(_crouchKey);
-        _isSprintPressed |= Input.GetKeyDown(_sprintKey);
+        _isCrouchPressed |= Input.GetKey(_crouchKey);
+        _isSprintPressed |= Input.GetKey(_sprintKey);
     }
 
     public NetworkInputData GetLocalInputs()
@@ -55,7 +55,8 @@ public class LocalInputs : MonoBehaviour
         _networkInputData.networkButtons.Set(MyButtons.Jump, _isJumpPressed);
         _isJumpPressed = false;
 
-        _networkInputData.IsFirePressed = Input.GetKey(_shootKey);
+        _networkInputData.networkButtons.Set(MyButtons.Shoot, _isFirePressed);
+        _isFirePressed = false;
 
         return _networkInputData;
     }

@@ -207,5 +207,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _maxLife: 100
-  __currentHealth: 0
-  __isDead: 0
+  _CurrentHealth: 0
+  _IsDead:
+    _value: 0

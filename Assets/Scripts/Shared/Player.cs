@@ -1,5 +1,4 @@
 using Fusion;
-using Fusion.Addons.Physics;
 using UnityEngine;
 
 public class Player : NetworkBehaviour
@@ -13,9 +12,7 @@ public class Player : NetworkBehaviour
     [Header("Movement")]
     [SerializeField] MovementComponent _movement;
 
-    [SerializeField] Ragdoll _ragdoll;
     [SerializeField] CharacterRotator _characterRotator;
-    //[SerializeField] CharacterInputController _inputController;
     [SerializeField] GroundRaycast _groundRaycast;
     [SerializeField] InteractRaycast _interactRaycast;
     //[SerializeField] CharacterMeshSelector _meshSelector;
@@ -26,8 +23,6 @@ public class Player : NetworkBehaviour
 
     public override void Spawned()
     {
-        _ragdoll.DisableRagdoll();
-
         _health.OnDead += Death;
 
         /*_randomMeshIndex = UnityEngine.Random.Range(0, _meshSelector.MecanimAnims.Length);
@@ -56,15 +51,8 @@ public class Player : NetworkBehaviour
     public override void FixedUpdateNetwork()
     {
         if (!GetInput(out NetworkInputData inputs)) return;
+        if (_health.IsDead) return;
 
-        if (_health.IsDead)
-        {
-            RPC_ActivateRagdoll(true);
-            return;
-        }
-
-        RPC_ActivateRagdoll(false);
-        
         _movement.Movement(inputs.MovementInput, Runner);
 
         if (inputs.networkButtons.IsSet(MyButtons.Jump))
@@ -72,7 +60,7 @@ public class Player : NetworkBehaviour
             _movement.Jump(_isGround);
         }
 
-        if (inputs.networkButtons.IsSet(MyButtons.Shoot) && _weapon._readyToFire)
+        if (inputs.networkButtons.IsSet(MyButtons.Shoot) && _weapon._readyToFire && !inputs.networkButtons.IsSet(MyButtons.Sprint))
         {
             _weapon.Fire();
         }
@@ -81,19 +69,6 @@ public class Player : NetworkBehaviour
         _movement.SetSprint(inputs.networkButtons.IsSet(MyButtons.Sprint));
 
         _characterRotator.RotateDefault(inputs.MovementInput);
-    }
-
-    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-    public void RPC_ActivateRagdoll(bool activate)
-    {
-        if (activate)
-        {
-            _ragdoll.ActivateRagdoll();
-        }
-        else
-        {
-            _ragdoll.DisableRagdoll();
-        }
     }
 
     void Death()

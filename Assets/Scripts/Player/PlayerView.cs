@@ -8,14 +8,17 @@ public class PlayerView : NetworkBehaviour
     [SerializeField] CharacterColliderResizer _characterColliderResizer;
     [SerializeField] MovementComponent _movement;
     [SerializeField] HealthSystem _healthSystem;
+    [SerializeField] Ragdoll _ragdoll;
 
     public override void Spawned()
-    {    
+    {
+        _ragdoll.DisableRagdoll();
+
         _movement.OnMoving += MoveAnimation;
         _movement.OnJumping += JumpAnimation;
         _movement.OnCrouching += OnCrouchAnimation;
 
-        _healthSystem.OnDead += () => EnableMeshRender(true);
+        _healthSystem.OnDeadChanged += OnDeadStateChanged;
     }
 
     void MoveAnimation(float speed)
@@ -42,8 +45,11 @@ public class PlayerView : NetworkBehaviour
         }
     }
 
-    /*void EnableMeshRender(bool isDead)
+    void OnDeadStateChanged(bool isDead)
     {
-        _playerVisual.SetActive(!isDead);
-    }*/
+        if (isDead)
+            _ragdoll.ActivateRagdoll();
+        else
+            _ragdoll.DisableRagdoll();
+    }
 }

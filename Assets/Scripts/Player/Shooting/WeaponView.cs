@@ -38,13 +38,13 @@ public class WeaponView : NetworkBehaviour
         _coroutine = null;
     }
 
-    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
     void RPC_PlayShootVFX()
     {
         _shootVFX.Play();
     }
 
-    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    [Rpc(RpcSources.InputAuthority, RpcTargets.All)]
     void RPC_PlayShootSFX()
     {
         _audioSource.Play();

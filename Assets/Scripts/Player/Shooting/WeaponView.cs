@@ -26,8 +26,11 @@ public class WeaponView : NetworkBehaviour
             _coroutine = StartCoroutine(LightCoroutine());
         }
 
-        RPC_PlayShootVFX();
-        RPC_PlayShootSFX();
+        if (HasStateAuthority)
+        {
+            RPC_PlayShootVFX();
+            RPC_PlayShootSFX();
+        }
     }
 
     IEnumerator LightCoroutine()

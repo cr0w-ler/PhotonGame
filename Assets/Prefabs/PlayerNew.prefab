@@ -3831,6 +3831,7 @@ MonoBehaviour:
   - {fileID: 7302153620256590648}
   - {fileID: 577549235567698703}
   - {fileID: 996544923378881573}
+  - {fileID: 1472474481005220215}
   - {fileID: 496621333591681958}
   - {fileID: 5919547586218829964}
   - {fileID: 8742799346939261472}
@@ -4061,6 +4062,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _health: {fileID: 577549235567698703}
   _maxDeaths: 3
+  _delayToRespawn: 3
 --- !u!1 &8197445980673343475
 GameObject:
   m_ObjectHideFlags: 0

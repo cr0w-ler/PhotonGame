@@ -15,15 +15,16 @@ public class Player : NetworkBehaviour
     [SerializeField] CharacterRotator _characterRotator;
     [SerializeField] GroundRaycast _groundRaycast;
     [SerializeField] InteractRaycast _interactRaycast;
-    //[SerializeField] CharacterMeshSelector _meshSelector;
     [SerializeField] CharacterAnimationController _animationController;
-    bool _isGround;
+    [Networked] public NetworkBool _isGround { get; private set; }
+
     Camera _camera;
+    
+    //[SerializeField] CharacterMeshSelector _meshSelector;
     //int _randomMeshIndex = 0;
 
     public override void Spawned()
     {
-
         /*_randomMeshIndex = UnityEngine.Random.Range(0, _meshSelector.MecanimAnims.Length);
 
          _meshSelector.SelectMesh(_randomMeshIndex);
@@ -37,18 +38,12 @@ public class Player : NetworkBehaviour
 
         GameManager.Instance.AddToList(this);
     }
-
-    void Update()
-    {
-        if (!HasInputAuthority) return;
-
-        _isGround = _groundRaycast.IsRaycasting(Vector3.down);
-
-        _animationController.SetBool(AnimParams.Air, !_isGround);
-    }
         
     public override void FixedUpdateNetwork()
     {
+        _isGround = _groundRaycast.IsRaycasting(Vector3.down);
+        _animationController.SetBool(AnimParams.Air, !_isGround);
+
         if (!GetInput(out NetworkInputData inputs)) return;
         if (_health.IsDead) return;
 

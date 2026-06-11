@@ -3,14 +3,14 @@ using Fusion.Addons.Physics;
 using System;
 using UnityEngine;
 
-public class MovementComponent : MonoBehaviour
+public class MovementComponent : NetworkBehaviour
 {
     [Header("Speed")]
     [SerializeField] float _defaultSpeed = 5f;
     [SerializeField] float _crouchSpeed = 3f;
     [SerializeField] float _sprintSpeed = 8f;
     [SerializeField] float _jumpForce = 5f;
-    float _currentSpeed;
+    [Networked] public float _currentSpeed { get; set; }
 
     [Header("References")]
     [SerializeField] NetworkRigidbody3D _rb;
@@ -30,7 +30,7 @@ public class MovementComponent : MonoBehaviour
         Vector3 velocity = direction.normalized * _currentSpeed;
         _rb.Rigidbody.MovePosition(_rb.Rigidbody.position + velocity * runner.DeltaTime);
 
-        OnMoving(Mathf.Clamp01(direction.magnitude) * _currentSpeed);
+        OnMoving?.Invoke(Mathf.Clamp01(direction.magnitude) * _currentSpeed);
     }
 
     public void Jump(bool isGrounded)
@@ -44,13 +44,13 @@ public class MovementComponent : MonoBehaviour
         velocity.y = _jumpForce;
         _rb.Rigidbody.linearVelocity = velocity;
 
-        OnJumping();
+        OnJumping?.Invoke();
     }
 
     public void SetCrouch(bool isCrouching)
     {
         _currentSpeed = isCrouching ? _crouchSpeed : _defaultSpeed;
-        OnCrouching(isCrouching);
+        OnCrouching?.Invoke(isCrouching);
     }
 
     public void SetSprint(bool isSprinting)

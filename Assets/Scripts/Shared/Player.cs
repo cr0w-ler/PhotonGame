@@ -42,7 +42,8 @@ public class Player : NetworkBehaviour
     public override void FixedUpdateNetwork()
     {
         _isGround = _groundRaycast.IsRaycasting(Vector3.down);
-        _animationController.SetBool(AnimParams.Air, !_isGround);
+        _movement.SetGrounded(_isGround);
+        //_animationController.SetBool(AnimParams.Air, !_isGround);
 
         if (!GetInput(out NetworkInputData inputs)) return;
         if (_health.IsDead) return;

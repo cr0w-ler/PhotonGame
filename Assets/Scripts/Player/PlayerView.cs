@@ -10,31 +10,41 @@ public class PlayerView : NetworkBehaviour
     [SerializeField] HealthSystem _healthSystem;
     [SerializeField] Ragdoll _ragdoll;
 
+    private int _lastJumpCounter;
+    private bool _lastCrouchState;
+
     public override void Spawned()
     {
         _ragdoll.DisableRagdoll();
 
-        _movement.OnMoving += MoveAnimation;
-        _movement.OnJumping += JumpAnimation;
-        _movement.OnCrouching += OnCrouchAnimation;
-
         _healthSystem.OnDeadChanged += OnDeadStateChanged;
         _healthSystem.OnRespawn += OnRespawned;
+
+        _lastJumpCounter = _movement.JumpCounter;
+        _lastCrouchState = _movement.IsCrouching;
     }
 
-    void MoveAnimation(float speed)
+    public override void Render()
     {
-        _animationController.SetFloat(AnimParams.Speed, speed);
+        _animationController.SetFloat(AnimParams.Speed, _movement.MovementMagnitude);
+        _animationController.SetBool(AnimParams.Air, !_movement.IsGrounded);
+
+        if (_movement.JumpCounter != _lastJumpCounter)
+        {
+            _lastJumpCounter = _movement.JumpCounter;
+            _animationController.SetTrigger(AnimParams.Jump);
+        }
+
+        if (_movement.IsCrouching != _lastCrouchState)
+        {
+            _lastCrouchState = _movement.IsCrouching;
+            ApplyCrouch(_movement.IsCrouching);
+        }
     }
 
-    void JumpAnimation()
+    private void ApplyCrouch(bool isCrouching)
     {
-        _animationController.SetTrigger(AnimParams.Jump);
-    }
-
-    public void OnCrouchAnimation(bool isCrouching)
-    {
-        if(isCrouching)
+        if (isCrouching)
         {
             _characterColliderResizer.SetSize(1, new Vector3(0, -0.5f, 0));
             _animationController.SetBool(AnimParams.Crouch, true);
